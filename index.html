@@ -1,35 +1,70 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>今天去哪玩？</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>🎲 今天去哪玩？</h1>
+  <div class="container">
+    <h1>🎲 今天去哪玩？</h1>
 
-  <div class="random-box">
-    <button onclick="drawRandom()">抽地點</button>
-    <p id="randomResult">按下上面按鈕開始！</p>
-  </div>
+    <div class="random-box">
+      <h3>條件篩選</h3>
+      <select id="filterType">
+        <option value="">所有類型</option>
+      </select>
+      <select id="filterArea">
+        <option value="">所有地區</option>
+      </select>
 
-  <hr>
+      <button onclick="drawRandom()">抽地點</button>
+      <p id="randomResult">按下上面按鈕開始！</p>
+    </div>
 
-  <div class="add-form">
-    <h2>➕ 新增地點</h2>
-    <input type="text" id="placeName" placeholder="地點名稱">
-    <input type="text" id="placeType" placeholder="類型（吃的、玩的）">
-    <input type="text" id="placeArea" placeholder="地區">
-    <button onclick="addPlace()">儲存地點</button>
-  </div>
+    <hr />
 
-  <hr>
+    <div class="add-form">
+      <h2>➕ 新增地點</h2>
+      <input type="text" id="placeName" placeholder="地點名稱" />
+      <input type="text" id="placeType" placeholder="類型（吃的、玩的）" />
+      <input type="text" id="placeArea" placeholder="地區" list="areaList" />
+      <button onclick="addPlace()">儲存地點</button>
 
-  <div class="list-box">
-    <h2>📋 所有地點</h2>
-    <ul id="placeList"></ul>
+      <!-- 提示地區 datalist -->
+      <datalist id="areaList">
+        <option value="台北市">台北市</option>
+        <option value="新北市">新北市</option>
+        <option value="基隆市">基隆市</option>
+        <option value="桃園市">桃園市</option>
+        <option value="新竹市">新竹市</option>
+        <option value="新竹縣">新竹縣</option>
+        <option value="苗栗縣">苗栗縣</option>
+        <option value="台中市">台中市</option>
+        <option value="彰化縣">彰化縣</option>
+        <option value="南投縣">南投縣</option>
+        <option value="雲林縣">雲林縣</option>
+        <option value="嘉義市">嘉義市</option>
+        <option value="嘉義縣">嘉義縣</option>
+        <option value="台南市">台南市</option>
+        <option value="高雄市">高雄市</option>
+        <option value="屏東縣">屏東縣</option>
+        <option value="台東縣">台東縣</option>
+        <option value="花蓮縣">花蓮縣</option>
+        <option value="宜蘭縣">宜蘭縣</option>
+        <option value="澎湖縣">澎湖縣</option>
+        <option value="金門縣">金門縣</option>
+        <option value="連江縣">連江縣</option>
+      </datalist>
+    </div>
+
+    <hr />
+
+    <div class="list-box">
+      <h2>📋 所有地點</h2>
+      <ul id="placeList"></ul>
+    </div>
   </div>
 
   <script src="script.js"></script>
