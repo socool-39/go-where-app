@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今天去哪玩？</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <h1>🎲 今天去哪玩？</h1>
+
+  <div class="random-box">
+    <button onclick="drawRandom()">抽地點</button>
+    <p id="randomResult">按下上面按鈕開始！</p>
+  </div>
+
+  <hr>
+
+  <div class="add-form">
+    <h2>➕ 新增地點</h2>
+    <input type="text" id="placeName" placeholder="地點名稱">
+    <input type="text" id="placeType" placeholder="類型（吃的、玩的）">
+    <input type="text" id="placeArea" placeholder="地區">
+    <button onclick="addPlace()">儲存地點</button>
+  </div>
+
+  <hr>
+
+  <div class="list-box">
+    <h2>📋 所有地點</h2>
+    <ul id="placeList"></ul>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
