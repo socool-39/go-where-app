@@ -28,7 +28,12 @@
     <div class="add-form">
       <h2>➕ 新增地點</h2>
       <input type="text" id="placeName" placeholder="地點名稱" />
-      <input type="text" id="placeType" placeholder="類型（吃的、玩的）" />
+      <input type="text" id="placeType" placeholder="類型" list="typelist" />
+      <datalist id="typeList">
+        <option value="吃的">
+        <option value="喝的">
+        <option value="玩的">
+        <option value="休閒">
       <input type="text" id="placeArea" placeholder="地區" list="areaList" />
       <button onclick="addPlace()">儲存地點</button>
 
@@ -65,8 +70,17 @@
       <h2>📋 所有地點</h2>
       <ul id="placeList"></ul>
     </div>
+
+    <hr />
+
+    <div class="export-import">
+      <h2>💾 匯出 / 匯入</h2>
+      <button onclick="exportPlaces()">匯出 JSON</button>
+      <input type="file" id="importFile" accept="application/json" onchange="importPlaces(event)" />
+    </div>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
