@@ -1,80 +1,96 @@
 /* 整體置中容器 */
 .container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 10px;
-  }
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 10px;
+}
 
 /* 背景與字體 */
 body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: #f2f4f8;
-    color: #333;
-  }
-  
-  /* 標題 */
-  h1 {
-    text-align: center;
-    color: #1e88e5;
-    font-size: 28px;
-    margin-bottom: 20px;
-  }
-  
-  h2, h3 {
-    color: #444;
-    margin-bottom: 10px;
-  }
-  
-  /* 卡片樣式 */
-  .random-box, .add-form, .list-box {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
-  }
-  
-  /* 輸入框 */
-  input, select {
-    padding: 10px;
-    font-size: 16px;
-    margin: 6px 0;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-  }
-  
-  /* 按鈕樣式 */
-  button {
-    padding: 10px 18px;
-    background-color: #1e88e5;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    transition: background-color 0.3s;
-  }
-  
-  button:hover {
-    background-color: #1565c0;
-  }
-  
-  /* 清單項目 */
-  #placeList {
-    list-style-type: none;
-    padding-left: 0;
-  }
-  
-  #placeList li {
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    background-color: #e3f2fd;
-    border-radius: 6px;
-    font-size: 16px;
-  }
-  
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f2f4f8;
+  color: #333;
+}
+
+/* 標題 */
+h1 {
+  text-align: center;
+  color: #1e88e5;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+h2, h3 {
+  color: #444;
+  margin-bottom: 10px;
+}
+
+/* 卡片樣式 */
+.random-box, .add-form, .list-box, .export-import {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+}
+
+/* 輸入框 */
+input, select {
+  padding: 10px;
+  font-size: 16px;
+  margin: 6px 0;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* 按鈕樣式 */
+button {
+  padding: 6px 12px;
+  background-color: #1e88e5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #1565c0;
+}
+
+/* 清單項目 */
+#placeList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#placeList li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 抽籤結果動畫 */
+#randomResult {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 15px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+#randomResult.show {
+  opacity: 1;
+}
