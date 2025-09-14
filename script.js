@@ -5,11 +5,15 @@ function updatePlaceList() {
   list.innerHTML = "";
   places.forEach((p, i) => {
     const li = document.createElement("li");
-    li.textContent = `${p.name} (${p.type} - ${p.area})`;
+    li.innerHTML = `
+      ${p.name} (${p.type} - ${p.area})
+      <button onclick="editPlace(${i})">✏️</button>
+      <button onclick="deletePlace(${i})">🗑</button>
+    `;
     list.appendChild(li);
   });
 
-  updateFilters(); // 更新篩選選單
+  updateFilters();
 }
 
 function updateFilters() {
@@ -59,6 +63,30 @@ function addPlace() {
   document.getElementById("placeName").value = "";
   document.getElementById("placeType").value = "";
   document.getElementById("placeArea").value = "";
+
+  alert("✅ 已新增地點！");
+}
+
+function deletePlace(index) {
+  if (confirm("確定要刪除嗎？")) {
+    places.splice(index, 1);
+    localStorage.setItem("places", JSON.stringify(places));
+    updatePlaceList();
+  }
+}
+
+function editPlace(index) {
+  const newName = prompt("修改地點名稱：", places[index].name);
+  const newType = prompt("修改類型：", places[index].type);
+  const newArea = prompt("修改地區：", places[index].area);
+
+  if (newName) {
+    places[index].name = newName.trim();
+    places[index].type = newType.trim();
+    places[index].area = newArea.trim();
+    localStorage.setItem("places", JSON.stringify(places));
+    updatePlaceList();
+  }
 }
 
 function drawRandom() {
@@ -76,15 +104,51 @@ function drawRandom() {
     return typeMatch && areaMatch;
   });
 
+  const result = document.getElementById("randomResult");
+  result.classList.remove("show");
+
   if (filtered.length === 0) {
-    document.getElementById("randomResult").textContent = "⚠️ 沒有符合條件的地點！";
+    result.textContent = "⚠️ 沒有符合條件的地點！";
+    setTimeout(() => result.classList.add("show"), 50);
     return;
   }
 
   const randomIndex = Math.floor(Math.random() * filtered.length);
   const chosen = filtered[randomIndex];
-  document.getElementById("randomResult").textContent =
-    `👉 ${chosen.name}（${chosen.type} - ${chosen.area}）`;
+  result.textContent = `👉 ${chosen.name}（${chosen.type} - ${chosen.area}）`;
+
+  setTimeout(() => result.classList.add("show"), 50);
+}
+
+function exportPlaces() {
+  const blob = new Blob([JSON.stringify(places, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "places.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importPlaces(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (Array.isArray(imported)) {
+        places = [...places, ...imported];
+        localStorage.setItem("places", JSON.stringify(places));
+        updatePlaceList();
+        alert("✅ 匯入成功！");
+      }
+    } catch (err) {
+      alert("⚠️ 匯入失敗，檔案格式錯誤");
+    }
+  };
+  reader.readAsText(file);
 }
 
 // 初始化
