@@ -47,6 +47,17 @@ input, select {
   box-sizing: border-box;
 }
 
+/* 篩選列（Flexbox 並排） */
+.filter-row {
+  display: flex;
+  gap: 10px; /* 元素之間的間距 */
+  margin-bottom: 10px;
+}
+
+.filter-row select {
+  flex: 1; /* 平分寬度 */
+}
+
 /* 按鈕樣式 */
 button {
   padding: 6px 12px;
@@ -94,3 +105,4 @@ button:hover {
 #randomResult.show {
   opacity: 1;
 }
+
