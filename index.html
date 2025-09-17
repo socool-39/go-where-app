@@ -28,13 +28,15 @@
     <div class="add-form">
       <h2>➕ 新增地點</h2>
       <input type="text" id="placeName" placeholder="地點名稱" />
-      <input type="text" id="placeType" placeholder="類型" list="typelist" />
-      <datalist id="typeList">
-        <option value="吃的">
-        <option value="喝的">
-        <option value="玩的">
-        <option value="休閒">
-      </datalist>   
+      
+      <!-- 類型改成下拉選單 -->
+      <select id="placeType">
+        <option value="">請選擇類型</option>
+        <option value="吃的">吃的</option>
+        <option value="喝的">喝的</option>
+        <option value="玩的">玩的</option>
+        <option value="休閒">休閒</option>
+      </select>
       <!-- 地區輸入 -->
       <input type="text" id="placeArea" placeholder="地區" list="areaList" />
       <!-- 儲存按鈕 -->
@@ -86,5 +88,6 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
