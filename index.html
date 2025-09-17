@@ -12,13 +12,14 @@
 
     <div class="random-box">
       <h3>條件篩選</h3>
-      <select id="filterType">
-        <option value="">所有類型</option>
-      </select>
-      <select id="filterArea">
-        <option value="">所有地區</option>
-      </select>
-
+      <div class="filter-row">
+        <select id="filterType">
+          <option value="">所有類型</option>
+        </select>
+        <select id="filterArea">
+          <option value="">所有地區</option>
+        </select>
+      </div>
       <button onclick="drawRandom()">抽地點</button>
       <p id="randomResult">按下上面按鈕開始！</p>
     </div>
@@ -88,6 +89,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
