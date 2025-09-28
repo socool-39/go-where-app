@@ -53,6 +53,7 @@ function updatePlaceList() {
   updateFilters();
 }
 
+// 1) 重建「類型 / 地區」下拉，最後重建「細項」下拉
 function updateFilters() {
   const typeSet = new Set();
   const areaSet = new Set();
@@ -64,11 +65,10 @@ function updateFilters() {
 
   const typeSelect = document.getElementById("filterType");
   const areaSelect = document.getElementById("filterArea");
-
   if (!typeSelect || !areaSelect) return;
 
   typeSelect.innerHTML = '<option value="">所有類型</option>';
-  areaSelect.innerHTML = '<option value="">所有地區</option>';
+  areaSelect.innerHTML  = '<option value="">所有地區</option>';
 
   [...typeSet].sort().forEach(type => {
     const opt = document.createElement("option");
@@ -83,6 +83,9 @@ function updateFilters() {
     opt.textContent = area;
     areaSelect.appendChild(opt);
   });
+
+  // 依「已選類型」重建細項下拉
+  buildFilterSubtype();
 }
 
 /***************
@@ -103,21 +106,53 @@ function populateSubtype(type) {
       subSel.appendChild(opt);
     });
     subSel.disabled = false;
-    subSel.hidden = false;
+    subSel.hidden   = false;
   } else {
     subSel.disabled = true;
-    subSel.hidden = true;
+    subSel.hidden   = true;
   }
+}
+
+// 2) 依「已選類型」建立條件篩選的細項下拉
+function buildFilterSubtype() {
+  const typeSel = document.getElementById("filterType");
+  const subSel  = document.getElementById("filterSubtype");
+  if (!typeSel || !subSel) return;
+
+  const selectedType = typeSel.value;
+  const subtypeSet = new Set();
+
+  places.forEach(p => {
+    if ((!selectedType || p.type === selectedType) && p.subtype) {
+      subtypeSet.add(p.subtype);
+    }
+  });
+
+  subSel.innerHTML = '<option value="">所有細項</option>';
+
+  if (subtypeSet.size === 0) {
+    subSel.disabled = true;
+    return;
+  }
+
+  [...subtypeSet].sort().forEach(st => {
+    const opt = document.createElement("option");
+    opt.value = st;
+    opt.textContent = st;
+    subSel.appendChild(opt);
+  });
+
+  subSel.disabled = false;
 }
 
 /***************
  * CRUD（本地維護端）
  ***************/
 function addPlace() {
-  const name = document.getElementById("placeName").value.trim();
-  const type = document.getElementById("placeType").value.trim();
+  const name    = document.getElementById("placeName").value.trim();
+  const type    = document.getElementById("placeType").value.trim();
   const subtype = (document.getElementById("placeSubtype")?.value || "").trim();
-  const area = document.getElementById("placeArea").value.trim();
+  const area    = document.getElementById("placeArea").value.trim();
 
   if (!name) {
     alert("請輸入地點名稱！");
@@ -146,13 +181,13 @@ function deletePlace(index) {
 
 function editPlace(index) {
   const p = places[index];
-  const newName = prompt("修改地點名稱：", p.name);
+  const newName    = prompt("修改地點名稱：", p.name);
   if (newName === null) return;
-  const newType = prompt("修改類型：", p.type ?? "");
+  const newType    = prompt("修改類型：", p.type ?? "");
   if (newType === null) return;
   const newSubtype = prompt("修改細分類（可留空）：", p.subtype ?? "");
   if (newSubtype === null) return;
-  const newArea = prompt("修改地區：", p.area ?? "");
+  const newArea    = prompt("修改地區：", p.area ?? "");
   if (newArea === null) return;
 
   places[index] = {
@@ -167,7 +202,7 @@ function editPlace(index) {
 }
 
 /***************
- * 隨機抽籤
+ * 隨機抽籤（同時套用 類型/細項/地區）
  ***************/
 function drawRandom() {
   if (places.length === 0) {
@@ -175,29 +210,34 @@ function drawRandom() {
     return;
   }
 
-  const filterType = document.getElementById("filterType").value;
-  const filterArea = document.getElementById("filterArea").value;
+  const filterType    = document.getElementById("filterType")?.value || "";
+  const filterSubtype = document.getElementById("filterSubtype")?.value || "";
+  const filterArea    = document.getElementById("filterArea")?.value || "";
 
   const filtered = places.filter(p => {
-    const typeMatch = !filterType || p.type === filterType;
-    const areaMatch = !filterArea || p.area === filterArea;
-    return typeMatch && areaMatch;
+    const typeMatch    = !filterType    || p.type === filterType;
+    const subtypeMatch = !filterSubtype || p.subtype === filterSubtype;
+    const areaMatch    = !filterArea    || p.area === filterArea;
+    return typeMatch && subtypeMatch && areaMatch;
   });
 
   const result = document.getElementById("randomResult");
-  result.classList.remove("show");
+  if (result) result.classList.remove("show");
 
   if (filtered.length === 0) {
-    result.textContent = "⚠️ 沒有符合條件的地點！";
-    setTimeout(() => result.classList.add("show"), 50);
+    if (result) {
+      result.textContent = "⚠️ 沒有符合條件的地點！";
+      setTimeout(() => result.classList.add("show"), 50);
+    }
     return;
   }
 
-  const randomIndex = Math.floor(Math.random() * filtered.length);
-  const chosen = filtered[randomIndex];
-  result.textContent = `👉 ${chosen.name}（${chosen.type || "-"}${chosen.subtype ? ' / ' + chosen.subtype : ''} - ${chosen.area || "-" }）`;
-
-  setTimeout(() => result.classList.add("show"), 50);
+  const chosen = filtered[Math.floor(Math.random() * filtered.length)];
+  if (result) {
+    result.textContent =
+      `👉 ${chosen.name}（${chosen.type || "-"}${chosen.subtype ? ' / ' + chosen.subtype : ''} - ${chosen.area || "-" }）`;
+    setTimeout(() => result.classList.add("show"), 50);
+  }
 }
 
 /***************
@@ -272,6 +312,12 @@ async function importFromGitHub() {
  ***************/
 window.addEventListener("load", () => {
   updatePlaceList(); // 以本地資料先渲染
-  const typeSel = document.getElementById("placeType");
-  if (typeSel) typeSel.addEventListener("change", (e) => populateSubtype(e.target.value));
+
+  // 「新增表單」的類型→細項連動
+  const typeSelForm = document.getElementById("placeType");
+  if (typeSelForm) typeSelForm.addEventListener("change", (e) => populateSubtype(e.target.value));
+
+  // 「條件篩選」的類型→細項連動
+  const typeSelFilter = document.getElementById("filterType");
+  if (typeSelFilter) typeSelFilter.addEventListener("change", buildFilterSubtype);
 });
