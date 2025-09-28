@@ -89,12 +89,14 @@
       <h2>💾 匯出 / 匯入</h2>
       <button onclick="exportPlaces()">匯出 JSON</button>
       <input type="file" id="importFile" accept="application/json" onchange="importPlaces(event)" />
+      <button id="btnImportRaw" onclick="importFromGitHub()">從 GitHub 取得最新資料</button>
     </div>
   </div>
-
+  
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
