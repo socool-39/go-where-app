@@ -55,7 +55,7 @@ function addPlace() {
     alert("請輸入地點名稱！");
     return;
   }
-
+  
   places.push({ name, type, area });
   localStorage.setItem("places", JSON.stringify(places));
   updatePlaceList();
@@ -151,5 +151,44 @@ function importPlaces(event) {
   reader.readAsText(file);
 }
 
+
+// 類型 -> 細分類對照
+const subtypeOptions = {
+  "吃的": ["火鍋","烤肉","韓式","日式","中式","泰式","義式","早午餐","炸物","甜點","夜市","素食"],
+  "喝的": ["咖啡","手搖","酒吧","茶館","果汁"],
+  "玩的": ["景點","步道","展覽","電影院","桌遊","溫泉","密室逃脫","唱歌"],
+  "休閒": ["公園","百貨","運動","書店","夜市"]
+};
+
+// 依類型填入細分類選單
+function populateSubtype(type) {
+  const subSel = document.getElementById("placeSubtype");
+  const opts = subtypeOptions[type] || [];
+
+  subSel.innerHTML = '<option value="">請選擇細分類</option>';
+
+  if (opts.length > 0) {
+    opts.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      subSel.appendChild(opt);
+    });
+    subSel.disabled = false;
+    subSel.hidden = false;
+  } else {
+    subSel.disabled = true;
+    subSel.hidden = true;
+  }
+}
+
+// 類型改變時，更新細分類
+window.addEventListener("load", () => {
+  const typeSel = document.getElementById("placeType");
+  if (typeSel) {
+    typeSel.addEventListener("change", (e) => populateSubtype(e.target.value));
+  }
+});
 // 初始化
 updatePlaceList();
+
