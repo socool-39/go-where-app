@@ -1,14 +1,51 @@
+/***************
+ * 設定區
+ ***************/
+const RAW_JSON_URL = "https://raw.githubusercontent.com/socool-39/go-where-app/main/places.json"; 
+// ↑ 若你把檔名/路徑改了，記得換這個網址
+
+// 類型 -> 細分類對照
+const subtypeOptions = {
+  "吃的": ["火鍋","烤肉","韓式","日式","中式","泰式","義式","早午餐","炸物","甜點","夜市","素食"],
+  "喝的": ["咖啡","手搖","酒吧","茶館","果汁"],
+  "玩的": ["景點","步道","展覽","電影院","桌遊","溫泉","密室逃脫","唱歌"],
+  "休閒": ["公園","百貨","運動","書店","夜市"]
+};
+
+// 以 localStorage 為主的本地資料
 let places = JSON.parse(localStorage.getItem("places") || "[]");
 
+/***************
+ * 工具：合併／儲存
+ ***************/
+// 避免重複：name + type + subtype + area 完全相同視為同一筆（同鍵則覆蓋）
+function mergePlaces(newItems) {
+  const key = p => [p.name||"", p.type||"", p.subtype||"", p.area||""].join("|");
+  const map = new Map(places.map(p => [key(p), p]));
+  for (const item of (newItems || [])) {
+    map.set(key(item), { ...map.get(key(item)), ...item });
+  }
+  places = Array.from(map.values());
+}
+
+function saveLocal() {
+  localStorage.setItem("places", JSON.stringify(places));
+}
+
+/***************
+ * UI 渲染
+ ***************/
 function updatePlaceList() {
   const list = document.getElementById("placeList");
   list.innerHTML = "";
   places.forEach((p, i) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${p.name} (${p.type}${p.subtype ? ' / ' + p.subtype : ''} - ${p.area})
-      <button onclick="editPlace(${i})">✏️</button>
-      <button onclick="deletePlace(${i})">🗑</button>
+      ${p.name} (${p.type || "-"}${p.subtype ? ' / ' + p.subtype : ''} - ${p.area || "-"})
+      <span>
+        <button onclick="editPlace(${i})">✏️</button>
+        <button onclick="deletePlace(${i})">🗑</button>
+      </span>
     `;
     list.appendChild(li);
   });
@@ -28,6 +65,8 @@ function updateFilters() {
   const typeSelect = document.getElementById("filterType");
   const areaSelect = document.getElementById("filterArea");
 
+  if (!typeSelect || !areaSelect) return;
+
   typeSelect.innerHTML = '<option value="">所有類型</option>';
   areaSelect.innerHTML = '<option value="">所有地區</option>';
 
@@ -46,6 +85,34 @@ function updateFilters() {
   });
 }
 
+/***************
+ * 細分類連動
+ ***************/
+function populateSubtype(type) {
+  const subSel = document.getElementById("placeSubtype");
+  if (!subSel) return;
+
+  const opts = subtypeOptions[type] || [];
+  subSel.innerHTML = '<option value="">請選擇細分類</option>';
+
+  if (opts.length > 0) {
+    opts.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      subSel.appendChild(opt);
+    });
+    subSel.disabled = false;
+    subSel.hidden = false;
+  } else {
+    subSel.disabled = true;
+    subSel.hidden = true;
+  }
+}
+
+/***************
+ * CRUD（本地維護端）
+ ***************/
 function addPlace() {
   const name = document.getElementById("placeName").value.trim();
   const type = document.getElementById("placeType").value.trim();
@@ -56,9 +123,9 @@ function addPlace() {
     alert("請輸入地點名稱！");
     return;
   }
-  
-  places.push({ name, type, subtype, area });
-  localStorage.setItem("places", JSON.stringify(places));
+
+  mergePlaces([{ name, type, subtype, area }]);
+  saveLocal();
   updatePlaceList();
 
   document.getElementById("placeName").value = "";
@@ -71,29 +138,37 @@ function addPlace() {
 }
 
 function deletePlace(index) {
-  if (confirm("確定要刪除嗎？")) {
-    places.splice(index, 1);
-    localStorage.setItem("places", JSON.stringify(places));
-    updatePlaceList();
-  }
+  if (!confirm("確定要刪除嗎？")) return;
+  places.splice(index, 1);
+  saveLocal();
+  updatePlaceList();
 }
 
 function editPlace(index) {
-  const newName = prompt("修改地點名稱：", places[index].name);
-  const newType = prompt("修改類型：", places[index].type);
-  const newSubtype = prompt("修改細分類（可留空）：", places[index].subtype || "");
-  const newArea = prompt("修改地區：", places[index].area);
+  const p = places[index];
+  const newName = prompt("修改地點名稱：", p.name);
+  if (newName === null) return;
+  const newType = prompt("修改類型：", p.type ?? "");
+  if (newType === null) return;
+  const newSubtype = prompt("修改細分類（可留空）：", p.subtype ?? "");
+  if (newSubtype === null) return;
+  const newArea = prompt("修改地區：", p.area ?? "");
+  if (newArea === null) return;
 
-  if (newName) {
-    places[index].name = newName.trim();
-    places[index].type = (newType || "").trim();
-    places[index].subtype = (newSubtype || "").trim();
-    places[index].area = (newArea || "").trim();
-    localStorage.setItem("places", JSON.stringify(places));
-    updatePlaceList();
-  }
+  places[index] = {
+    ...p,
+    name: newName.trim(),
+    type: newType.trim(),
+    subtype: newSubtype.trim(),
+    area: newArea.trim()
+  };
+  saveLocal();
+  updatePlaceList();
 }
 
+/***************
+ * 隨機抽籤
+ ***************/
 function drawRandom() {
   if (places.length === 0) {
     alert("你還沒新增任何地點！");
@@ -120,17 +195,21 @@ function drawRandom() {
 
   const randomIndex = Math.floor(Math.random() * filtered.length);
   const chosen = filtered[randomIndex];
-  result.textContent = `👉 ${chosen.name}（${chosen.type} - ${chosen.area}）`;
+  result.textContent = `👉 ${chosen.name}（${chosen.type || "-"}${chosen.subtype ? ' / ' + chosen.subtype : ''} - ${chosen.area || "-" }）`;
 
   setTimeout(() => result.classList.add("show"), 50);
 }
 
+/***************
+ * 匯出 / 匯入（手動流程）
+ ***************/
 function exportPlaces() {
+  const ts = new Date().toISOString().replace(/[:.]/g, '-'); // 檔名帶時間戳
   const blob = new Blob([JSON.stringify(places, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "places.json";
+  a.download = `places-${ts}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -143,12 +222,11 @@ function importPlaces(event) {
   reader.onload = e => {
     try {
       const imported = JSON.parse(e.target.result);
-      if (Array.isArray(imported)) {
-        places = [...places, ...imported];
-        localStorage.setItem("places", JSON.stringify(places));
-        updatePlaceList();
-        alert("✅ 匯入成功！");
-      }
+      if (!Array.isArray(imported)) throw new Error("格式需為陣列");
+      mergePlaces(imported);
+      saveLocal();
+      updatePlaceList();
+      alert("✅ 匯入成功（檔案）！");
     } catch (err) {
       alert("⚠️ 匯入失敗，檔案格式錯誤");
     }
@@ -156,45 +234,44 @@ function importPlaces(event) {
   reader.readAsText(file);
 }
 
+/***************
+ * 一鍵：從 GitHub Raw 匯入
+ ***************/
+async function importFromGitHub() {
+  const btn = document.getElementById("btnImportRaw");
+  const originalText = btn ? btn.textContent : "";
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = "更新中…"; }
 
-// 類型 -> 細分類對照
-const subtypeOptions = {
-  "吃的": ["火鍋","烤肉","韓式","日式","中式","泰式","義式","早午餐","炸物","甜點","夜市","素食"],
-  "喝的": ["咖啡","手搖","酒吧","茶館","果汁"],
-  "玩的": ["景點","步道","展覽","電影院","桌遊","溫泉","密室逃脫","唱歌"],
-  "休閒": ["公園","百貨","運動","書店","夜市"]
-};
+    const res = await fetch(RAW_JSON_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("下載失敗：" + res.status);
 
-// 依類型填入細分類選單
-function populateSubtype(type) {
-  const subSel = document.getElementById("placeSubtype");
-  const opts = subtypeOptions[type] || [];
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error("內容格式需為陣列");
 
-  subSel.innerHTML = '<option value="">請選擇細分類</option>';
+    const before = JSON.stringify(places);
+    mergePlaces(data);
+    const after = JSON.stringify(places);
 
-  if (opts.length > 0) {
-    opts.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s;
-      opt.textContent = s;
-      subSel.appendChild(opt);
-    });
-    subSel.disabled = false;
-    subSel.hidden = false;
-  } else {
-    subSel.disabled = true;
-    subSel.hidden = true;
+    if (before !== after) {
+      saveLocal();
+      updatePlaceList();
+      alert("✅ 已從 GitHub 更新完成！");
+    } else {
+      alert("ℹ️ 目前已是最新資料。");
+    }
+  } catch (e) {
+    alert("⚠️ 從 GitHub 匯入失敗：\n" + (e?.message || e));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = originalText || "從 GitHub 取得最新資料"; }
   }
 }
 
-// 類型改變時，更新細分類
+/***************
+ * 初始化
+ ***************/
 window.addEventListener("load", () => {
+  updatePlaceList(); // 以本地資料先渲染
   const typeSel = document.getElementById("placeType");
-  if (typeSel) {
-    typeSel.addEventListener("change", (e) => populateSubtype(e.target.value));
-  }
+  if (typeSel) typeSel.addEventListener("change", (e) => populateSubtype(e.target.value));
 });
-// 初始化
-updatePlaceList();
-
-
