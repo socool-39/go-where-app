@@ -6,7 +6,7 @@ function updatePlaceList() {
   places.forEach((p, i) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${p.name} (${p.type} - ${p.area})
+      ${p.name} (${p.type}${p.subtype ? ' / ' + p.subtype : ''} - ${p.area})
       <button onclick="editPlace(${i})">✏️</button>
       <button onclick="deletePlace(${i})">🗑</button>
     `;
@@ -49,6 +49,7 @@ function updateFilters() {
 function addPlace() {
   const name = document.getElementById("placeName").value.trim();
   const type = document.getElementById("placeType").value.trim();
+  const subtype = (document.getElementById("placeSubtype")?.value || "").trim();
   const area = document.getElementById("placeArea").value.trim();
 
   if (!name) {
@@ -56,12 +57,14 @@ function addPlace() {
     return;
   }
   
-  places.push({ name, type, area });
+  places.push({ name, type, subtype, area });
   localStorage.setItem("places", JSON.stringify(places));
   updatePlaceList();
 
   document.getElementById("placeName").value = "";
   document.getElementById("placeType").value = "";
+  const subSel = document.getElementById("placeSubtype");
+  if (subSel) { subSel.value = ""; subSel.disabled = true; subSel.hidden = true; }
   document.getElementById("placeArea").value = "";
 
   alert("✅ 已新增地點！");
@@ -78,12 +81,14 @@ function deletePlace(index) {
 function editPlace(index) {
   const newName = prompt("修改地點名稱：", places[index].name);
   const newType = prompt("修改類型：", places[index].type);
+  const newSubtype = prompt("修改細分類（可留空）：", places[index].subtype || "");
   const newArea = prompt("修改地區：", places[index].area);
 
   if (newName) {
     places[index].name = newName.trim();
-    places[index].type = newType.trim();
-    places[index].area = newArea.trim();
+    places[index].type = (newType || "").trim();
+    places[index].subtype = (newSubtype || "").trim();
+    places[index].area = (newArea || "").trim();
     localStorage.setItem("places", JSON.stringify(places));
     updatePlaceList();
   }
@@ -191,4 +196,5 @@ window.addEventListener("load", () => {
 });
 // 初始化
 updatePlaceList();
+
 
